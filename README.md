@@ -1,19 +1,20 @@
-# Py_Flask_Boilerplate
+# NZB Show Tracker
 
-A robust boilerplate for Flask applications with user authentication, PostgreSQL database integration, and Docker containerization.
+A Flask-based web application for tracking and managing TV shows using NZB files and SABnzbd integration.
 
 ## Features
 
 - User registration and login system
 - PostgreSQL database integration with SQLAlchemy ORM
 - Docker containerization for easy deployment
-- Responsive design with customizable CSS
-- User dashboard and settings pages
+- Responsive design with customizable CSS and dark mode support
+- User dashboard for managing tracked shows
+- Search functionality for finding NZB files
+- Integration with SABnzbd for automatic NZB downloads
 - Theme switching capability (light/dark mode)
 - Flask-Migrate for database migrations
 - Secure password hashing with Werkzeug
 - Session-based authentication
-- RESTful API structure
 
 ## Prerequisites
 
@@ -24,8 +25,8 @@ A robust boilerplate for Flask applications with user authentication, PostgreSQL
 
 1. Clone the repository:
    ```
-   git clone https://github.com/yourusername/Py_Flask_Boilerplate.git
-   cd Py_Flask_Boilerplate
+   git clone https://github.com/yourusername/nzb-show-tracker.git
+   cd nzb-show-tracker
    ```
 
 2. Build and run the Docker containers:
@@ -38,7 +39,7 @@ A robust boilerplate for Flask applications with user authentication, PostgreSQL
 ## Project Structure
 
 ```
-Py_Flask_Boilerplate/
+nzb-show-tracker/
 ├── backend/
 │   ├── templates/
 │   │   ├── base.html
@@ -47,13 +48,17 @@ Py_Flask_Boilerplate/
 │   │   ├── register.html
 │   │   ├── dashboard.html
 │   │   ├── user_settings.html
-│   │   └── app_settings.html
+│   │   ├── app_settings.html
+│   │   ├── episodes.html
+│   │   └── search_results.html
 │   ├── static/
 │   │   └── css/
 │   │       ├── base.css
+│   │       ├── dashboard.css
 │   │       └── dark-theme.css
 │   ├── app.py
 │   ├── routes.py
+│   ├── app_routes.py
 │   ├── models.py
 │   ├── Dockerfile
 │   └── requirements.txt
@@ -66,19 +71,20 @@ Py_Flask_Boilerplate/
 
 ## Usage
 
-1. Visit the homepage at `http://localhost:5000`
-2. Register a new user account
-3. Log in with your credentials
-4. Access the dashboard
-5. Explore user settings and app settings pages
-6. Try switching between light and dark themes
+1. Visit the homepage and register a new user account
+2. Log in with your credentials
+3. Add shows to track from the dashboard
+4. Search for episodes of your tracked shows
+5. Send NZB files directly to SABnzbd for download
+6. View and manage your tracked shows and episodes
+7. Customize application settings, including SABnzbd integration
 
 ## Development
 
 To make changes to the application:
 
 1. Modify the Flask application in `backend/app.py`
-2. Update routes in `backend/routes.py`
+2. Update routes in `backend/routes.py` and `backend/app_routes.py`
 3. Modify database models in `backend/models.py`
 4. Update HTML templates in `backend/templates/`
 5. Add or modify CSS in `backend/static/css/`
@@ -120,13 +126,15 @@ This project uses Flask-Migrate for database migrations. To create and apply mig
 - GET `/dashboard`: Access user dashboard
 - GET, POST `/user_settings`: View and update user settings
 - GET, POST `/app_settings`: View and update application settings
+- GET `/search/<show_title>`: Search for episodes of a show
+- GET `/episodes/<show_id>`: View episodes for a specific show
+- POST `/send_to_sabnzbd`: Send an NZB file to SABnzbd
 
 ## Security Features
 
 - Password hashing using Werkzeug's generate_password_hash and check_password_hash
 - Session-based authentication
-- CSRF protection (to be implemented)
-- Input validation and sanitization (to be implemented)
+- API key management for external services
 
 ## Contributing
 
@@ -149,3 +157,4 @@ This project is open source and available under the [MIT License](LICENSE).
 - PostgreSQL
 - Docker
 - Werkzeug
+- SABnzbd

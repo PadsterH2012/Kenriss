@@ -105,7 +105,7 @@ def app_settings():
         session['theme'] = theme
         
         # Update AppSettings
-        for key in ['API_KEY', 'BASE_URL', 'MARKER']:
+        for key in ['API_KEY', 'BASE_URL', 'MARKER', 'SABNZBD_API', 'SABNZBD_URL']:
             value = request.form.get(key)
             setting = AppSettings.query.filter_by(key=key).first()
             if setting:
@@ -121,6 +121,8 @@ def app_settings():
     api_settings = {
         'API_KEY': AppSettings.get_setting('API_KEY'),
         'BASE_URL': AppSettings.get_setting('BASE_URL'),
-        'MARKER': AppSettings.get_setting('MARKER')
+        'MARKER': AppSettings.get_setting('MARKER'),
+        'SABNZBD_API': AppSettings.get_setting('SABNZBD_API'),
+        'SABNZBD_URL': AppSettings.get_setting('SABNZBD_URL')
     }
     return render_template('app_settings.html', current_theme=current_theme, api_settings=api_settings)

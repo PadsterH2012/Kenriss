@@ -30,7 +30,9 @@ class AppSettings(db.Model):
         default_settings = [
             ('API_KEY', ''),
             ('BASE_URL', ''),
-            ('MARKER', '')
+            ('MARKER', ''),
+            ('SABNZBD_API', ''),
+            ('SABNZBD_URL', '')
         ]
         for key, value in default_settings:
             if not cls.query.filter_by(key=key).first():

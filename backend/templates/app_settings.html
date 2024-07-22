@@ -9,8 +9,8 @@
         <h2>Theme</h2>
         <label for="theme">Theme:</label>
         <select id="theme" name="theme">
-            <option value="light" {% if current_theme != 'dark' %}selected{% endif %}>Light</option>
-            <option value="dark" {% if current_theme == 'dark' %}selected{% endif %}>Dark</option>
+            <option value="light" {{ 'selected' if current_theme == 'light' else '' }}>Light</option>
+            <option value="dark" {{ 'selected' if current_theme == 'dark' else '' }}>Dark</option>
         </select>
 
         <h2>API Settings</h2>
@@ -22,6 +22,12 @@
 
         <label for="MARKER">Marker:</label>
         <input type="text" id="MARKER" name="MARKER" value="{{ api_settings.MARKER }}">
+
+        <label for="SABNZBD_API">SABnzbd API Key:</label>
+        <input type="text" id="SABNZBD_API" name="SABNZBD_API" value="{{ api_settings.SABNZBD_API }}">
+
+        <label for="SABNZBD_URL">SABnzbd URL:</label>
+        <input type="text" id="SABNZBD_URL" name="SABNZBD_URL" value="{{ api_settings.SABNZBD_URL }}">
         
         <button type="submit">Save Settings</button>
     </form>

@@ -1,15 +1,99 @@
 import re
 from datetime import datetime
 import requests
-from flask import Blueprint, request, flash, redirect, url_for, render_template, current_app
+from flask import Blueprint, request, flash, redirect, url_for, render_template, current_app, jsonify
 from models import db, Show, Episode, AppSettings
+import requests
 
 bp = Blueprint('app_routes', __name__)
+
+@bp.route('/send_to_sabnzbd', methods=['POST'])
+def send_to_sabnzbd():
+    sabnzbd_url = AppSettings.get_setting('SABNZBD_URL')
+    sabnzbd_api = AppSettings.get_setting('SABNZBD_API')
+    
+    if not sabnzbd_url or not sabnzbd_api:
+        return jsonify({'success': False, 'message': 'SABnzbd URL or API key not set'}), 400
+
+    # Construct the SABnzbd API URL
+    api_url = f"{sabnzbd_url}/api"
+    
+    # Prepare the base parameters for the SABnzbd API call
+    params = {
+        'apikey': sabnzbd_api,
+        'output': 'json'
+    }
+
+    # Log the API URL and parameters (mask the API key)
+    masked_params = params.copy()
+    masked_params['apikey'] = '*' * len(masked_params['apikey'])
+    current_app.logger.info(f"Sending request to SABnzbd API. URL: {api_url}, Params: {masked_params}")
+
+    # First, test the API connection
+    test_params = params.copy()
+    test_params['mode'] = 'version'
+    try:
+        test_response = requests.get(api_url, params=test_params)
+        test_response.raise_for_status()
+        test_result = test_response.json()
+        if 'version' not in test_result:
+            current_app.logger.error(f"SABnzbd API test failed. Response: {test_result}")
+            return jsonify({'success': False, 'message': 'Failed to connect to SABnzbd API', 'details': test_result}), 400
+    except requests.RequestException as e:
+        current_app.logger.error(f"Error testing SABnzbd API connection: {str(e)}")
+        return jsonify({'success': False, 'message': 'Error connecting to SABnzbd API', 'details': str(e)}), 500
+
+    if 'nzb_file' in request.files:
+        # File upload case
+        nzb_file = request.files['nzb_file']
+        params['mode'] = 'addfile'
+        files = {'nzbfile': (nzb_file.filename, nzb_file)}
+        response = requests.post(api_url, params=params, files=files)
+    elif 'nzb_url' in request.form:
+        # URL-based case
+        params['mode'] = 'addurl'
+        params['name'] = request.form['nzb_url']
+        response = requests.get(api_url, params=params)
+    elif 'local_path' in request.form:
+        # Local file path case
+        params['mode'] = 'addlocalfile'
+        params['name'] = request.form['local_path']
+        response = requests.get(api_url, params=params)
+    else:
+        return jsonify({'success': False, 'message': 'No NZB file, URL, or local path provided'}), 400
+
+    if 'nzbname' in request.form:
+        params['nzbname'] = request.form['nzbname']
+
+    try:
+        response.raise_for_status()
+        
+        # Log the response status and content
+        current_app.logger.info(f"SABnzbd API response status: {response.status_code}")
+        current_app.logger.info(f"SABnzbd API response content: {response.text[:1000]}...")  # Log first 1000 characters
+
+        # Try to parse JSON, but handle the case where it's not JSON
+        try:
+            result = response.json()
+            if result.get('status'):
+                return jsonify({'success': True, 'message': 'Successfully sent to SABnzbd'})
+            else:
+                current_app.logger.error(f"SABnzbd API returned error: {result}")
+                return jsonify({'success': False, 'message': 'Failed to send to SABnzbd', 'details': result}), 400
+        except ValueError:
+            # Response is not JSON
+            current_app.logger.error(f"Unexpected response from SABnzbd (not JSON): {response.text}")
+            return jsonify({'success': False, 'message': 'Unexpected response from SABnzbd (not JSON)'}), 500
+    except requests.RequestException as e:
+        current_app.logger.error(f"Error sending to SABnzbd: {str(e)}")
+        return jsonify({'success': False, 'message': 'Error communicating with SABnzbd', 'details': str(e)}), 500
 
 def search_show(title):
     BASE_URL = AppSettings.get_setting('BASE_URL')
     API_KEY = AppSettings.get_setting('API_KEY')
     url = f"{BASE_URL}?t=search&q={title}&apikey={API_KEY}&o=json"
+    masked_url = url.replace(API_KEY, '*' * len(API_KEY))
+    print(f"API Request: {masked_url}")  # Output the masked URL to console
     response = requests.get(url)
     return response.json()
 
@@ -98,7 +182,13 @@ def search(show_title):
     remove_duplicate_episodes(show.id)
 
     filtered_results.sort(key=lambda x: extract_date_from_title(x['title']) or datetime.min, reverse=True)
-    return render_template('search_results.html', results=filtered_results, show_title=show_title)
+    
+    # Add SABnzbd API details to the results
+    sabnzbd_url = AppSettings.get_setting('SABNZBD_URL')
+    sabnzbd_api = AppSettings.get_setting('SABNZBD_API')
+    
+    return render_template('search_results.html', results=filtered_results, show_title=show_title,
+                           sabnzbd_url=sabnzbd_url, sabnzbd_api=sabnzbd_api)
 
 @bp.route('/episodes/<int:show_id>')
 def episodes(show_id):

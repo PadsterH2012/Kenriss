@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Episodes - {{ show.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="text-center mb-4">{{ show.title }}</h1>
+    <h3>Episodes</h3>
+    <ul class="list-group mt-4">
+        {% for episode in episodes %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <strong>{{ episode.name }}</strong>
+            {% if episode.nzb_id %}
+                <span class="badge bg-primary">NZB ID: {{ episode.nzb_id }}</span>
+            {% else %}
+                <span class="badge bg-secondary">NZB ID: Not Available</span>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+    <div class="text-center mt-4">
+        <a href="{{ url_for('routes.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .list-group-item {
+        background-color: var(--input-background);
+        border-color: var(--input-border);
+        margin-bottom: 10px;
+        border-radius: 4px;
+    }
+    .badge {
+        font-size: 0.8em;
+        padding: 5px 10px;
+    }
+    .bg-primary {
+        background-color: var(--primary-color) !important;
+    }
+    .bg-secondary {
+        background-color: var(--secondary-color) !important;
+    }
+</style>
+{% endblock %}
