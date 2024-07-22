@@ -47,7 +47,7 @@ pipeline {
                     sh 'sleep 30'
 
                     // Basic health check
-                    sh 'curl -f http://localhost:5000/health || exit 1'
+                    sh 'curl -f http://localhost:5000/ || exit 1'
 
                     // Add more comprehensive tests here
                     // sh 'docker-compose exec backend pytest'
