@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, current_app
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 import time
@@ -18,7 +18,33 @@ def create_app():
     migrate.init_app(app, db)
 
     with app.app_context():
-        db.create_all()  # This line creates the tables
+        # Import all models here
+        from models import User, Show, Episode, AppSettings
+        
+        # Create tables for all models
+        db.create_all()
+        
+        # Check if all tables exist
+        from sqlalchemy import inspect
+        inspector = inspect(db.engine)
+        expected_tables = ['users', 'show', 'episode', 'app_settings']
+        existing_tables = inspector.get_table_names()
+        
+        for table in expected_tables:
+            if table not in existing_tables:
+                app.logger.warning(f"Table '{table}' does not exist. Creating it now.")
+                if table == 'users':
+                    User.__table__.create(db.engine)
+                elif table == 'show':
+                    Show.__table__.create(db.engine)
+                elif table == 'episode':
+                    Episode.__table__.create(db.engine)
+                elif table == 'app_settings':
+                    AppSettings.__table__.create(db.engine)
+        
+        # Initialize app settings
+        AppSettings.initialize_settings()
+        
         from routes import bp as routes_bp
         from app_routes import bp as app_routes_bp
         app.register_blueprint(routes_bp, url_prefix='')
