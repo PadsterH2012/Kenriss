@@ -11,7 +11,7 @@ migrate = Migrate()
 def create_app():
     app = Flask(__name__, template_folder=os.path.abspath('templates'), static_folder=os.path.abspath('static'))
     app.secret_key = 'your_secret_key'
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://user:password@db:5432/mydatabase'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://user:password@db:5432/nzb_show_tracker_db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     db.init_app(app)
