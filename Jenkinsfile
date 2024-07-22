@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials')
-        DOCKER_IMAGE_NAME = 'your-dockerhub-username/nzb-show-tracker'
+        DOCKER_IMAGE_NAME = 'padster2012/nzb_show_tracker'
         DOCKER_IMAGE_TAG = "${env.BUILD_NUMBER}"
     }
 
@@ -35,6 +35,7 @@ pipeline {
 
         stage('Deploy with Docker Compose') {
             steps {
+                sh 'docker-compose --version'  // Check if docker-compose is installed
                 sh 'docker-compose up -d'
             }
         }
@@ -45,12 +46,11 @@ pipeline {
                     // Wait for the application to start
                     sh 'sleep 30'
 
-                    // Run your tests here
-                    // For example, you could use pytest for Python tests:
-                    // sh 'docker-compose exec backend pytest'
+                    // Basic health check
+                    sh 'curl -f http://localhost:5000/health || exit 1'
 
-                    // Or you could run curl commands to test the API:
-                    sh 'curl -f http://localhost:5000 || exit 1'
+                    // Add more comprehensive tests here
+                    // sh 'docker-compose exec backend pytest'
                 }
             }
         }
@@ -59,6 +59,12 @@ pipeline {
     post {
         always {
             sh 'docker-compose down'
+        }
+        failure {
+            echo 'The Pipeline failed :('
+        }
+        success {
+            echo 'The Pipeline completed successfully :)'
         }
     }
 }
