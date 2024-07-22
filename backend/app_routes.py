@@ -244,9 +244,15 @@ def search_all():
 
 @bp.before_app_first_request
 def initialize():
-    shows = Show.query.all()
-    for show in shows:
-        remove_duplicate_episodes(show.id)
+    try:
+        shows = Show.query.all()
+        if shows:
+            for show in shows:
+                remove_duplicate_episodes(show.id)
+        else:
+            current_app.logger.info("No shows found in the database.")
+    except Exception as e:
+        current_app.logger.error(f"Error initializing: {str(e)}")
 
 def check_for_new_episodes():
     shows = Show.query.all()

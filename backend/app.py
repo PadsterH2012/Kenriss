@@ -18,12 +18,53 @@ def create_app():
     migrate.init_app(app, db)
 
     with app.app_context():
+        db.create_all()  # This line creates the tables
         from routes import bp as routes_bp
         from app_routes import bp as app_routes_bp
         app.register_blueprint(routes_bp, url_prefix='')
         app.register_blueprint(app_routes_bp, url_prefix='')
 
     return app
+
+def connect_to_database(app, retries=5, delay=5):
+    for attempt in range(retries):
+        try:
+            with app.app_context():
+                db.create_all()
+            print("Successfully connected to the database and created tables!")
+            return
+        except OperationalError as e:
+            if attempt < retries - 1:
+                print(f"Database connection attempt {attempt + 1} failed: {e}. Retrying in {delay} seconds...")
+                time.sleep(delay)
+            else:
+                print("Failed to connect to the database after multiple attempts.")
+                raise e
+
+if __name__ == '__main__':
+    app = create_app()
+    connect_to_database(app)
+    app.run(host='0.0.0.0', port=5000)
+
+def connect_to_database(app, retries=5, delay=5):
+    for attempt in range(retries):
+        try:
+            with app.app_context():
+                db.create_all()
+            print("Successfully connected to the database and created tables!")
+            return
+        except OperationalError as e:
+            if attempt < retries - 1:
+                print(f"Database connection attempt {attempt + 1} failed: {e}. Retrying in {delay} seconds...")
+                time.sleep(delay)
+            else:
+                print("Failed to connect to the database after multiple attempts.")
+                raise e
+
+if __name__ == '__main__':
+    app = create_app()
+    connect_to_database(app)
+    app.run(host='0.0.0.0', port=5000)
 
 def connect_to_database(app, retries=5, delay=5):
     for attempt in range(retries):
