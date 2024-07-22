@@ -6,11 +6,22 @@
     <h1>App Settings</h1>
     <div id="statusMessage" style="display: none; margin-bottom: 20px;"></div>
     <form id="appSettingsForm">
+        <h2>Theme</h2>
         <label for="theme">Theme:</label>
         <select id="theme" name="theme">
             <option value="light" {% if current_theme != 'dark' %}selected{% endif %}>Light</option>
             <option value="dark" {% if current_theme == 'dark' %}selected{% endif %}>Dark</option>
         </select>
+
+        <h2>API Settings</h2>
+        <label for="API_KEY">API Key:</label>
+        <input type="text" id="API_KEY" name="API_KEY" value="{{ api_settings.API_KEY }}">
+
+        <label for="BASE_URL">Base URL:</label>
+        <input type="text" id="BASE_URL" name="BASE_URL" value="{{ api_settings.BASE_URL }}">
+
+        <label for="MARKER">Marker:</label>
+        <input type="text" id="MARKER" name="MARKER" value="{{ api_settings.MARKER }}">
         
         <button type="submit">Save Settings</button>
     </form>
@@ -19,15 +30,12 @@
     document.getElementById('appSettingsForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
-        const theme = document.getElementById('theme').value;
+        const formData = new FormData(this);
         const statusMessage = document.getElementById('statusMessage');
         
         fetch('/app_settings', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `theme=${theme}`
+            body: formData
         })
         .then(response => response.json())
         .then(data => {

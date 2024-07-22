@@ -8,16 +8,18 @@
     {% if session.get('theme') == 'dark' %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-theme.css') }}">
     {% endif %}
-    {% block extra_css %}{% endblock %}
+    {% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    {% endblock %}
 </head>
 <body>
     {% if session.get('user_id') %}
     <header>
         <nav>
             <ul>
-                <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
-                <li><a href="{{ url_for('user_settings') }}">User Settings</a></li>
-                <li><a href="{{ url_for('app_settings') }}">App Settings</a></li>
+                <li><a href="{{ url_for('routes.dashboard') }}">Dashboard</a></li>
+                <li><a href="{{ url_for('routes.user_settings') }}">User Settings</a></li>
+                <li><a href="{{ url_for('routes.app_settings') }}">App Settings</a></li>
                 <li><a href="#" id="logoutButton">Logout</a></li>
             </ul>
         </nav>

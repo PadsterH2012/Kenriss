@@ -1,8 +1,35 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard{% endblock %}
+{% block title %}Dashboard - NZB Show Tracker{% endblock %}
 
 {% block content %}
-    <h1>Dashboard</h1>
-    <p>Welcome to your dashboard, {{ username }}!</p>
+<h1 class="text-center">NZB Show Tracker</h1>
+<div class="add-show-form mb-4">
+  <form method="post" action="{{ url_for('app_routes.add_show') }}" class="form-inline justify-content-center">
+    <div class="form-group flex-grow-1">
+      <label for="title" class="sr-only">Show Title</label>
+      <input type="text" class="form-control" id="title" name="title" placeholder="e.g. Netgirl">
+    </div>
+    <button type="submit" class="btn btn-success">Add Show</button>
+  </form>
+</div>
+<h2 class="text-center mb-4">Tracked Shows</h2>
+<div class="row">
+  {% for show in shows %}
+  <div class="col-md-12 mb-2">
+    <div class="card">
+      <div class="card-body">
+        <h3 class="card-title mb-3">{{ show.title }}</h3>
+        <div class="action-buttons">
+          <a href="{{ url_for('app_routes.episodes', show_id=show.id) }}" class="btn btn-info">View</a>
+          <a href="{{ url_for('app_routes.search', show_title=show.title) }}" class="btn btn-primary">Search</a>
+          <form method="post" action="{{ url_for('app_routes.delete_show', show_id=show.id) }}" class="d-inline">
+            <button type="submit" class="btn btn-danger">Delete</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
 {% endblock %}

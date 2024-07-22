@@ -1,9 +1,10 @@
-from flask import jsonify, session, render_template, url_for, request
+from flask import Blueprint, jsonify, session, render_template, url_for, request
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import User
-from app import app, db
+from models import User, db, AppSettings, Show
 
-@app.route('/register', methods=['POST'])
+bp = Blueprint('routes', __name__)
+
+@bp.route('/register', methods=['POST'])
 def register():
     if request.is_json:
         data = request.get_json()
@@ -23,7 +24,7 @@ def register():
     
     return jsonify({'message': 'User registered successfully!'})
 
-@app.route('/login', methods=['POST'])
+@bp.route('/login', methods=['POST'])
 def login():
     if request.is_json:
         data = request.get_json()
@@ -37,35 +38,40 @@ def login():
     
     if user and check_password_hash(user.password, data['password']):
         session['user_id'] = user.id
-        return jsonify({'message': 'Login successful!', 'redirect': url_for('dashboard')})
+        return jsonify({'message': 'Login successful!', 'redirect': url_for('routes.dashboard')})
     
     return jsonify({'message': 'Invalid credentials!'}), 401
 
-@app.route('/logout', methods=['POST'])
-def logout():
-    session.pop('user_id', None)
-    return jsonify({'message': 'Logged out successfully!'})
-
-@app.route('/')
+@bp.route('/')
+@bp.route('/index')
 def index():
     return render_template('index.html')
 
-@app.route('/login')
+@bp.route('/login')
 def login_page():
     return render_template('login.html')
 
-@app.route('/register')
+@bp.route('/register')
 def register_page():
     return render_template('register.html')
 
-@app.route('/dashboard')
+@bp.route('/dashboard')
 def dashboard():
     if 'user_id' not in session:
         return jsonify({'message': 'Unauthorized'}), 401
     user = User.query.get(session['user_id'])
-    return render_template('dashboard.html', username=user.username)
+    shows = Show.query.all()
+    return render_template('dashboard.html', username=user.username, shows=shows)
 
-@app.route('/user_settings', methods=['GET', 'POST'])
+# Ensure the dashboard route is registered with the correct name
+bp.add_url_rule('/dashboard', 'dashboard', dashboard)
+
+@bp.route('/logout', methods=['POST'])
+def logout():
+    session.pop('user_id', None)
+    return jsonify({'message': 'Logged out successfully!', 'redirect': url_for('routes.index')})
+
+@bp.route('/user_settings', methods=['GET', 'POST'])
 def user_settings():
     if 'user_id' not in session:
         return jsonify({'message': 'Unauthorized'}), 401
@@ -87,7 +93,9 @@ def user_settings():
     
     return render_template('user_settings.html', username=user.username, email=user.email)
 
-@app.route('/app_settings', methods=['GET', 'POST'])
+from models import AppSettings
+
+@bp.route('/app_settings', methods=['GET', 'POST'])
 def app_settings():
     if 'user_id' not in session:
         return jsonify({'message': 'Unauthorized'}), 401
@@ -95,7 +103,24 @@ def app_settings():
     if request.method == 'POST':
         theme = request.form.get('theme')
         session['theme'] = theme
+        
+        # Update AppSettings
+        for key in ['API_KEY', 'BASE_URL', 'MARKER']:
+            value = request.form.get(key)
+            setting = AppSettings.query.filter_by(key=key).first()
+            if setting:
+                setting.value = value
+            else:
+                new_setting = AppSettings(key=key, value=value)
+                db.session.add(new_setting)
+        
+        db.session.commit()
         return jsonify({'message': 'Settings updated successfully!'})
     
     current_theme = session.get('theme', 'light')
-    return render_template('app_settings.html', current_theme=current_theme)
+    api_settings = {
+        'API_KEY': AppSettings.get_setting('API_KEY'),
+        'BASE_URL': AppSettings.get_setting('BASE_URL'),
+        'MARKER': AppSettings.get_setting('MARKER')
+    }
+    return render_template('app_settings.html', current_theme=current_theme, api_settings=api_settings)

@@ -7,8 +7,8 @@
         <h1>Welcome to the Flask App</h1>
         <p>This is a boilerplate for Flask applications with user authentication and PostgreSQL database integration.</p>
         <nav class="home-nav">
-            <a href="{{ url_for('login') }}" class="btn">Login</a>
-            <a href="{{ url_for('register') }}" class="btn">Register</a>
+            <a href="{{ url_for('routes.login_page') }}" class="btn">Login</a>
+            <a href="{{ url_for('routes.register_page') }}" class="btn">Register</a>
         </nav>
     </div>
 {% endblock %}
