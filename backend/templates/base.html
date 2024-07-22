@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Flask App{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    {% if session.get('theme') == 'dark' %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-theme.css') }}">
+    {% endif %}
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% if session.get('user_id') %}
+    <header>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                <li><a href="{{ url_for('user_settings') }}">User Settings</a></li>
+                <li><a href="{{ url_for('app_settings') }}">App Settings</a></li>
+                <li><a href="#" id="logoutButton">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+    {% endif %}
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+    <footer>
+        <p>&copy; 2024 Flask App. All rights reserved.</p>
+    </footer>
+    {% block extra_js %}{% endblock %}
+    {% if session.get('user_id') %}
+    <script>
+    document.getElementById('logoutButton').addEventListener('click', function(e) {
+        e.preventDefault();
+        fetch('/logout', {
+            method: 'POST',
+        })
+        .then(response => response.json())
+        .then(data => {
+            window.location.href = '/';
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            alert('An error occurred during logout.');
+        });
+    });
+    </script>
+    {% endif %}
+</body>
+</html>

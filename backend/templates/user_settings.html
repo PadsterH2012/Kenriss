@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}User Settings{% endblock %}
+
+{% block content %}
+    <h1>User Settings</h1>
+    <form id="userSettingsForm">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" value="{{ username }}" required>
+        
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" value="{{ email }}" required>
+        
+        <label for="currentPassword">Current Password:</label>
+        <input type="password" id="currentPassword" name="currentPassword" required>
+        
+        <button type="submit">Update Profile</button>
+    </form>
+
+    <h2>Change Password</h2>
+    <form id="passwordForm">
+        <label for="newPassword">New Password:</label>
+        <input type="password" id="newPassword" name="newPassword" required>
+        
+        <label for="confirmNewPassword">Confirm New Password:</label>
+        <input type="password" id="confirmNewPassword" name="confirmNewPassword" required>
+        
+        <button type="submit">Update Password</button>
+    </form>
+
+    <script>
+    document.getElementById('userSettingsForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const username = document.getElementById('username').value;
+        const email = document.getElementById('email').value;
+        const currentPassword = document.getElementById('currentPassword').value;
+        
+        const formData = new FormData();
+        formData.append('username', username);
+        formData.append('email', email);
+        formData.append('currentPassword', currentPassword);
+        
+        fetch('/user_settings', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message === 'Profile updated successfully!') {
+                console.log('Profile updated successfully!');
+            } else {
+                console.error('Error:', data.message);
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+    });
+
+    document.getElementById('passwordForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+        
+        if (newPassword !== confirmNewPassword) {
+            console.error('New passwords do not match!');
+            return;
+        }
+        
+        // Add logic to send new password to the server
+        console.log('Sending new password to server...');
+        
+        // Placeholder for password change functionality
+        console.log('Password change functionality not fully implemented yet.');
+    });
+    </script>
+{% endblock %}

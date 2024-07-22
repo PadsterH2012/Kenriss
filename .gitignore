@@ -1,0 +1,20 @@
+.aider*
+# Byte-compiled files
+__pycache__/
+*.py[cod]
+
+# Distribution / packaging
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+*.egg-info/
+dist/
+build/
+
+# Docker
+*.log
+*.sqlite3
+db_data/

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}App Settings{% endblock %}
+
+{% block content %}
+    <h1>App Settings</h1>
+    <div id="statusMessage" style="display: none; margin-bottom: 20px;"></div>
+    <form id="appSettingsForm">
+        <label for="theme">Theme:</label>
+        <select id="theme" name="theme">
+            <option value="light" {% if current_theme != 'dark' %}selected{% endif %}>Light</option>
+            <option value="dark" {% if current_theme == 'dark' %}selected{% endif %}>Dark</option>
+        </select>
+        
+        <button type="submit">Save Settings</button>
+    </form>
+
+    <script>
+    document.getElementById('appSettingsForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const theme = document.getElementById('theme').value;
+        const statusMessage = document.getElementById('statusMessage');
+        
+        fetch('/app_settings', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `theme=${theme}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message === 'Settings updated successfully!') {
+                statusMessage.textContent = 'Settings updated successfully!';
+                statusMessage.style.display = 'block';
+                statusMessage.style.color = 'green';
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
+            } else {
+                statusMessage.textContent = 'Error: ' + data.message;
+                statusMessage.style.display = 'block';
+                statusMessage.style.color = 'red';
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            statusMessage.textContent = 'An error occurred while updating settings.';
+            statusMessage.style.display = 'block';
+            statusMessage.style.color = 'red';
+        });
+    });
+    </script>
+{% endblock %}
