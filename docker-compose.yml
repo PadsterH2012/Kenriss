@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: mydatabase
+      POSTGRES_DB: nzb_show_tracker_db
     volumes:
       - db_data:/var/lib/postgresql/data
 
@@ -17,7 +17,7 @@ services:
     depends_on:
       - db
     environment:
-      DATABASE_URL: postgres://user:password@db:5432/mydatabase
+      DATABASE_URL: postgres://user:password@db:5432/nzb_show_tracker_db
 
     ports:
       - "5000:5000"
