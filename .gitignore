@@ -4,7 +4,7 @@ __pycache__/
 *.py[cod]
 
 # Configuration files
-backend/config.py
+/backend/config.py
 
 # Distribution / packaging
 .Python
