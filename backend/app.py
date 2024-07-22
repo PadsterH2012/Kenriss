@@ -21,6 +21,11 @@ def create_app():
         # Import all models here
         from models import User, Show, Episode, AppSettings
         
+        # Create the database if it doesn't exist
+        from sqlalchemy_utils import database_exists, create_database
+        if not database_exists(db.engine.url):
+            create_database(db.engine.url)
+        
         # Create tables for all models
         db.create_all()
         
@@ -92,10 +97,11 @@ if __name__ == '__main__':
     connect_to_database(app)
     app.run(host='0.0.0.0', port=5000)
 
-def connect_to_database(app, retries=5, delay=5):
+def connect_to_database(app, retries=10, delay=5):
     for attempt in range(retries):
         try:
             with app.app_context():
+                db.engine.connect()
                 db.create_all()
             print("Successfully connected to the database!")
             return

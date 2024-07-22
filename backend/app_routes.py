@@ -137,9 +137,12 @@ def add_show():
 def delete_show(show_id):
     show = Show.query.get(show_id)
     if show:
+        # Delete all associated episodes first
+        Episode.query.filter_by(show_id=show_id).delete()
+        # Then delete the show
         db.session.delete(show)
         db.session.commit()
-        flash('Show deleted successfully!', 'success')
+        flash('Show and its episodes deleted successfully!', 'success')
     else:
         flash('Show not found.', 'danger')
     return redirect(url_for('routes.dashboard'))
