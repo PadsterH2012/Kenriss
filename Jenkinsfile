@@ -35,7 +35,7 @@ pipeline {
 
         stage('Deploy with Docker Compose') {
             steps {
-                sh 'docker-compose --version'  // Check if docker-compose is installed
+                sh 'docker-compose --version'  // Check if docker-compose is installed.
                 sh 'docker-compose up -d'
             }
         }
